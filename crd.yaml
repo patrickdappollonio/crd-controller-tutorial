@@ -1,0 +1,32 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: todos.patrickdap.com
+spec:
+  group: patrickdap.com
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            apiVersion:
+              type: string
+            kind:
+              type: string
+            metadata:
+              type: object
+            spec:
+              type: object
+              properties:
+                name:
+                  type: string
+  scope: Namespaced
+  names:
+    plural: todos
+    singular: todo
+    kind: Todo
+    shortNames:
+      - td

@@ -1,0 +1,7 @@
+apiVersion: patrickdap.com/v1
+kind: Todo
+metadata:
+  name: first-todo
+  namespace: default
+spec:
+  name: Buy groceries
