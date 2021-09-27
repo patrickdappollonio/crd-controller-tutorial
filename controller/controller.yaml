@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: example-controller-service-account
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: example-controller-role
+rules:
+  - apiGroups:
+    - "patrickdap.com"
+    resources:
+    - todos
+    verbs:
+    - list
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: example-controller-rolebinding
+subjects:
+  - kind: ServiceAccount
+    name: example-controller-service-account
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: example-controller-role
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: example-controller
+  template:
+    metadata:
+      labels:
+        app: example-controller
+    spec:
+      serviceAccountName: example-controller-service-account
+      containers:
+        - name: example-controller
+          image: demo-controller:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: web
+              containerPort: 8080
