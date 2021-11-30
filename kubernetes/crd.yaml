@@ -3,11 +3,63 @@ kind: CustomResourceDefinition
 metadata:
   name: todos.patrickdap.com
 spec:
+  # Whether the resource is Namespaced or Cluster-wide
+  scope: Namespaced
+
+  # Define all the names used by the resource, in this case
+  # you can do:
+  #  kubectl get todos
+  #  kubectl get td
+  names:
+    plural: todos
+    singular: todo
+    kind: Todo
+    shortNames:
+      - td
+
+  # Once the resource is part of Kubernetes, it also needs a group
+  # so then you could have foo.example.com register the concept of "Node"
+  # as well as v1/Node (the default Kubernetes one)
   group: patrickdap.com
+
+  # There's multiple versions for a Kubernetes resource, and it's common
+  # to find "v1beta1", "v1beta2", "v1" and so on
   versions:
-    - name: v1
+    -
+      # Versions are string-based and they're prioritized based on the
+      # Kubernetes version sorting algorithm. Those versions that match
+      # the Kubernetes sorting are "higher versions" than those who don't.
+      # See: https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definition-versioning/#version-priority
+      name: v1
+
+      # The next two fields control the behaviour of the resource in Kubernetes.
+      # If a resource is marked as "served", it means users can perform CRUD
+      # operations in resources under this version, "v1" in our case, and have
+      # them work as you would normally do.
+      # On multiple versions, only one can be marked as "storage". This means
+      # that the version marked as storage will be used to "store" it in etcd.
+      # However, there's a few caveats. For example, resources created on an
+      # older version which, back then, it was marked as "storage" will be kept
+      # stored as their old version, and they *will not be converted* to newer
+      # versions.
+      # You can use a conversion webhook to "migrate" resources to newer versions
+      # (see below for more details) or, if you manually edit the resource, you
+      # will be able to upgrade it as well.
       served: true
       storage: true
+      deprecated: false
+
+      # The OpenAPI Schema used to create the resource. There's hundreds of
+      # options here, like specifying default values, provide definitions,
+      # define fields that depend on each other, provide descriptions for
+      # documentation (such as "kubectl explain ..."), configure the value to
+      # be an enum, provide a basic format validator that supports, among other
+      # things fields like bson object IDs, uuids, isbn, credit card numbers,
+      # US SSN, hexadecimal, rgb, byte data, passwords, dates, durations; or
+      # you can even create sub-objects in an object, allow for patterns,
+      # validate minimum and maximum length, whether it's nullable or required,
+      # a title (used when printing), if the fields are unique, and a plethora
+      # of other options.
       schema:
         openAPIV3Schema:
           type: object
@@ -23,10 +75,37 @@ spec:
               properties:
                 name:
                   type: string
-  scope: Namespaced
-  names:
-    plural: todos
-    singular: todo
-    kind: Todo
-    shortNames:
-      - td
+                done:
+                  type: boolean
+                  default: false
+
+      # When printing fields using "kubectl get foo", only the name and the age,
+      # that is, the time since its creation, will be printed to screen. This
+      # setting allows the creation of multiple new columns for your CRD which
+      # will then be outputted automatically. This must match the current
+      # top-of-the-line version for your CRD.
+      additionalPrinterColumns:
+      - name: Action
+        type: string
+        description: Indicates the action to be done
+        jsonPath: .spec.name
+      - name: Done
+        type: boolean
+        description: Indicate whether the action described by this TODO was done
+        jsonPath: .spec.done
+      - name: Age
+        type: date
+        jsonPath: .metadata.creationTimestamp
+
+  # Different versions might require "changes" to move values between one
+  # version declaration to another. For example, in v1beta1, the field "foo"
+  # could've been in spec.fields.foo, but in v1 it could've been promoted
+  # to spec.foo (skipping "fields"). This conversion is not automated and,
+  # by default, Kubernetes will set the conversion strategy to None.
+  # Like Admission Controllers, it's possible to create a "webhook conversion"
+  # which registers an endpoint in the cluster -- this can be either an
+  # actual endpoint or a Kubernetes Service. The webhook must return a
+  # Kubernetes "ConversionReview" response.
+  # See: https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definition-versioning/#webhook-request-and-response
+  conversion:
+    strategy: None

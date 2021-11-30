@@ -27,6 +27,11 @@
         border-color: #3e8ed0 transparent #3e8ed0 transparent;
         animation: lds-hourglass 1.2s infinite;
       }
+
+      ul > li > span {
+        font-style: italic;
+      }
+
       @keyframes lds-hourglass {
         0% {
           transform: rotate(0);
@@ -82,7 +87,7 @@
           <h3>My TODO items for namespace: {{ namespace }}</h3>
           <ul>
             <li v-for="item in items" :key="item.title">
-              {{ item }}
+              {{ item.name }} <span v-if="item.done">(completed)</span> <span v-else>(not completed)</span>
             </li>
             <li v-if="items.length === 0"><em>No items found</em></li>
           </ul>

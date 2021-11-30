@@ -86,18 +86,23 @@ func showTodosForNamespace(kubeApi, namespace, token string) func(http.ResponseW
 	}
 }
 
+type todoItem struct {
+	Name string `json:"name"`
+	Done bool   `json:"done"`
+}
+
 type todoData struct {
 	Items []struct {
-		Spec struct {
-			Name string `json:"name"`
-		} `json:"spec"`
+		Spec todoItem `json:"spec"`
 	}
 }
 
-func specToMap(items todoData) []string {
-	m := make([]string, 0, len(items.Items))
-	for _, v := range items.Items {
-		m = append(m, v.Spec.Name)
+func specToMap(items todoData) []todoItem {
+	var result []todoItem
+
+	for _, item := range items.Items {
+		result = append(result, item.Spec)
 	}
-	return m
+
+	return result
 }
