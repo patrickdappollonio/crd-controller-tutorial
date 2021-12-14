@@ -224,3 +224,13 @@ It's also worth nothing that:
 > [#](https://github.com/kubernetes/kubernetes/issues/94761#issuecomment-880900951)
 
 On all other third-party cases, the [standard Kubernetes CRD versioning rules](https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definition-versioning/#overview) remain in place.
+
+For `storage:`, when a version is marked as such, it's used like that to be serialized into `etcd`, then:
+
+> Whenever you fetch an object, the api server reads it from etcd, converts it into an internal version, then converts it to the version you requested. [#](https://github.com/kubernetes/kubernetes/issues/58131#issuecomment-404466779)
+
+It's also worth noting that:
+
+> Controllers always get the version they requested from the API. They are not exposed to the stored version. [#](https://github.com/kubernetes/kubernetes/issues/58131#issuecomment-404466779)
+
+There's an entire [Google Docs Document](https://docs.google.com/document/d/1eoS1K40HLMl4zUyw5pnC05dEF3mzFLp5TPEEt4PFvsM/edit) regarding this discussion and how CRDs and "Stored" vs "Served" works.
