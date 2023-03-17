@@ -1,7 +1,7 @@
 FROM alpine as certs
 RUN apk add --no-cache ca-certificates && update-ca-certificates
 
-FROM golang:1.17 as builder
+FROM golang:1.20 as builder
 WORKDIR /app
 ADD . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -extldflags='-static'" -o /bin/controller
